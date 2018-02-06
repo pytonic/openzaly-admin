@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>添加扩展</title>
+    </title>
+    <!-- 引入 WeUI -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css" />
+    <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.0/css/jquery-weui.css" />
+    <link rel="stylesheet" href-data="Public/css/style.css" />
+    <style type="text/css">
+    <?php echo $css_code;
+    ?>
+    </style>
+</head>
+
+<body ontouchstart="">
+    <div class="weui-cells__title">
+        添加扩展
+    </div>
+    <div class="weui-cells weui-cells_form">
+        <div class="weui-cell">
+            <div class="weui-cell__hd">
+                <label class="weui-label">扩展名称</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input plugin_name"  type="text" placeholder="请输入扩展名称">
+            </div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__hd">
+                <label class="weui-label">url_page</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input plugin_url_page"  type="text" pattern="[a-z0-9]*" placeholder="例如：127.0.0.1:8080">
+            </div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__hd">
+                <label class="weui-label">url_api</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input plugin_url_api" type="text" pattern="[a-z\/0-9]*" placeholder="例如：/manage/index">
+            </div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__bd">
+                <div class="weui-uploader">
+                    <div class="weui-uploader__hd">
+                        <p class="weui-uploader__title">logo上传</p>
+                        <div class="weui-uploader__info">0/1</div>
+                    </div>
+                    <div class="weui-uploader__bd">
+                        <ul class="weui-uploader__files" id="uploaderFiles">
+                        </ul>
+                        <div class="weui-uploader__input-box">
+                            <input id="uploaderInput" class="weui-uploader__input uploaderInput" type="file" accept="image/*" multiple="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="weui-btn-area">
+            <a class="weui-btn basic-weui-btn weui-btn_primary basic-color addPluginButton" url-data="/managePlugin/addPlugin" href="javascript:" id="addPluginButton">确定</a>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.3/weui.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery-weui/1.2.0/js/jquery-weui.js"></script>
+    <script type="text/javascript">
+    function getOsType() {
+        var u = navigator.userAgent;
+        if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1) {
+            return 'Android';
+        } else if (u.indexOf('iPhone') > -1) {
+            return 'IOS';
+        } else {
+            return 'PC';
+        }
+    }
+
+    function reqUrl(reqUri, params, callbackName) {
+        var type = getOsType();
+        if (type == 'Android') {
+            Android.requestPost(reqUri, params, callbackName);
+        } else if (type == 'IOS') {
+            ios_requestPost(reqUri, params, callbackName);
+        } else {
+            $.toast('暂时不支持该设备');
+        }
+    }
+
+    function reqHtml(reqUri, params) {
+        var type = getOsType();
+        if (type == 'Android') {
+            Android.requestPage(reqUri, params)
+        } else if (type == 'IOS') {
+            ios_requestPage(reqUri, params);
+        } else {
+            $.toast('暂时不支持该设备');
+        }
+    }
+
+    function reqImageUpload(callback) {
+        var type = getOsType();
+        if (type == 'Android') {
+            Android.imageUpload(callback);
+        } else if (type == 'IOS') {
+            ios_imageUpload(callback);
+        } else {
+            $.toast('暂时不支持该设备');
+        }
+    }
+
+    function reqImageDownload(imageid, callback) {
+        var type = getOsType();
+        if (type == 'Android') {
+            Android.imageDownload(imageid, callback);
+        } else if (type == 'IOS') {
+            ios_imageDownload(imageid, callback);
+        } else {
+            $.toast('暂时不支持该设备');
+        }
+    }
+
+    function toast(msg) {
+        var type = getOsType();
+        if (type == 'Android') {
+            Android.showToast(msg);
+        } else if (type == 'IOS') {
+            $.toast(msg);
+        } else {
+            console.log(msg);
+        }
+    }
+
+    function isDomain(siteAddress) {
+        var siteAddressIpFlag = false;
+        var siteAddressDomainFlag = false;
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(siteAddress)) {
+            siteAddressIpFlag = true;
+        }
+        var re1 = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
+        var domain = siteAddress.match(re1) + '';
+        if (domain) {
+            var re2 = /^(.+\.)(com|edu|gov|int|mil|net|org|biz|info|name|museum|coop|aero|xyz|top|store|team|cc|shop|club|vip|ink|site|fun|online|work|red|group|tv|[a-z][a-z])$/;
+            if (!re2.test(domain)) {
+                siteAddressDomainFlag = false;
+            } else {
+                siteAddressDomainFlag = true;
+            }
+        } else {
+            siteAddressDomainFlag = false;
+        }
+
+        if (siteAddressDomainFlag || siteAddressIpFlag) {
+            return true;
+        }
+        return false;
+    }
+    $(document).on("click", ".addPluginButton", function() {
+        var reqUri = $(this).attr('url-data');
+        var urlApi = $('.plugin_url_api').val();
+        var urlPage = $('.plugin_url_page').val();
+        var name = $('.plugin_name').val();
+        var pluginIcon = $('.plugin_icon').attr('plugin-icon');
+        if (name.length < 1) {
+            $.toptip('插件名称不能为空', 'error');
+            return false;
+        }
+        if (urlPage.length < 1) {
+            $.toptip('ulr_page不能为空', 'error');
+            return false;
+        }
+        var newUrlPage  = urlPage.replace('：',":").split(':');
+        var urlPageFlag = isDomain(newUrlPage[0]);
+        if (!urlPageFlag) {
+            $.toptip('ulr_page请填写正确的域名或者ip地址', 'error');
+            return false;
+        }
+        if (urlApi.length < 1) {
+            $.toptip('url_api不能为空', 'error');
+            return false;
+        }
+        var params = {
+            'url_api': urlApi,
+            'url_page': urlPage,
+            'name': name,
+            'plugin_icon': pluginIcon
+        };
+        reqUrl(reqUri, JSON.stringify(params), 'addPlugin');
+        $('.addPluginButton').removeClass('weui-btn_primary');
+        $('.addPluginButton').removeClass('basic-color');
+        $('.addPluginButton').removeClass('basic-weui-btn');
+        $('.addPluginButton').addClass('weui-btn_disabled');
+        $('.addPluginButton').addClass('weui-btn_default');
+        $('.addPluginButton').prop('disabled', true);
+    });
+
+    function addPlugin(result) {
+        $('.addPluginButton').addClass('weui-btn_primary');
+        $('.addPluginButton').addClass('basic-color');
+        $('.addPluginButton').addClass('basic-weui-btn');
+        $('.addPluginButton').removeClass('weui-btn_disabled');
+        $('.addPluginButton').removeClass('weui-btn_default');
+        $('.addPluginButton').prop('disabled', false);
+        if (result == 'success') {
+            $('input').val('');
+            $('#uploaderFiles').html('');
+            $.toast('添加成功');
+        } else {
+            $.toast('添加失败', 'forbidden');
+        }
+    }
+
+    $(document).on("click", '.uploaderInput', function() {
+        reqImageUpload("jsimageUpload");
+    });
+
+    function jsimageUpload(result, imageId, imageLocalPath) {
+        var type = getOsType();
+        if (result == 1) {
+            if (type == 'Android') {
+                var img = '<li class="weui-uploader__file plugin_icon" plugin-icon="' + imageId + '"><img src="http://akaxin/img' + imageLocalPath + '" style="height:75px; width:75px;" /></li>';
+            } else {
+                var img = '<li class="weui-uploader__file plugin_icon" plugin-icon="' + imageId + '"><img src="' + imageLocalPath + '" style="height:75px; width:75px;" /></li>';
+            }
+            $('#uploaderFiles').html(img);
+            $('.pic_num').html('1/1');
+        } else {
+            $.toast('上传图片失败', 'forbidden');
+        }
+    }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+		<title>后台管理</title></title>
+		<!-- 引入 WeUI -->
+		<link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css"/>
+        <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.0/css/jquery-weui.css"/>
+		<link rel="stylesheet" href-data="Public/css/style.css"/>
+		<style type="text/css">
+			<?php echo $css_code;?>
+		</style>
+	</head>
+	<body ontouchstart="">
+		<header class='basic-header '>
+	    </header>
+		<div id="basic-config" class="weui-tab__bd-item weui-tab__bd-item--active">
+			<div class="weui-grids">
+				<a href="javascript:;" url-data="/manage/basic" class="url-data weui-grid js_grid" style="background-color: #F07878;">
+					<p class="weui-grid__label">
+						站点设置
+					</p>
+				</a>
+				<a href="javascript:;" class="weui-grid js_grid url-data "  url-data="/manageUser/index"  style="background-color: #FFB463;">
+					<p class="weui-grid__label">
+						用户管理
+					</p>
+				</a>
+				<a href="javascript:;" url-data="/manageGroup/index" class="url-data  weui-grid js_grid" style="background-color: #F0DF62;">
+					<p class="weui-grid__label">
+						群组管理
+					</p>
+				</a>
+				<a href="javascript:;" url-data="/manageInviteCode/index" class=" url-data  weui-grid js_grid"  style="background-color: #65DB9A;">
+					<p class="weui-grid__label">
+						邀请码
+					</p>
+				</a>
+				<a href="javascript:;" class="weui-grid js_grid url-data " url-data="/managePlugin/index"  style="background-color: #59C9C4;">
+					<p class="weui-grid__label">
+						扩展管理
+					</p>
+				</a>
+			</div>
+		</div>
+		  <script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
+      <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.1.3/weui.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery-weui/1.2.0/js/jquery-weui.js"></script>
+        <script type="text/javascript">
+        	function getOsType() {
+				var u = navigator.userAgent;
+				if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1 || u.indexOf('Windows Phone') > -1) {
+					return 'Android';
+				} else if (u.indexOf('iPhone') > -1) {
+					return 'IOS';
+				} else {
+					return 'PC';
+				}
+			}
+		function reqHtml(reqUri, params) {
+			var type = getOsType();
+			console.log(type);
+			if (type == 'Android') {
+				Android.requestPage(reqUri, params);
+			} else if (type == 'IOS') {
+				ios_requestPage(reqUri, params);
+			} else {
+				$.toast('暂时不支持该设备');
+			}
+		}
+
+		function toast(msg) {
+			var type = getOsType();
+			console.log(type);
+			if (type == 'Android') {
+				Android.showToast(msg);
+			} else if (type == 'IOS') {
+				$.toast(msg);
+			} else {
+				$.toast('暂时不支持该设备');
+			}
+		}
+		$(document).on("click", ".url-data", function() {
+			var reqUri = $(this).attr('url-data');
+			reqHtml(reqUri, "");
+		});
+        </script>
+	</body>
+</html>
