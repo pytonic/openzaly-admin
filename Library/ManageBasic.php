@@ -86,7 +86,7 @@ class ManageBasic
                 $configObjs = $configObjs->getSiteConfig();
 
                 $siteConfig = [
-                    'site_ip' => isset($configObjs[ConfigKey::SITE_ADDRESS]) ? $configObjs[ConfigKey::SITE_ADDRESS] : '',
+                    'site_ip'  => isset($configObjs[ConfigKey::SITE_ADDRESS]) ? $configObjs[ConfigKey::SITE_ADDRESS] : '',
                     'site_port' => isset($configObjs[ConfigKey::SITE_PORT]) ? $configObjs[ConfigKey::SITE_PORT] : '',
                     'site_http_address' => isset($configObjs[ConfigKey::SITE_HTTP_ADDRESS]) ? $configObjs[ConfigKey::SITE_HTTP_ADDRESS] : '',
                     'site_http_port' => isset($configObjs[ConfigKey::SITE_HTTP_PORT]) ? $configObjs[ConfigKey::SITE_HTTP_PORT] : '',

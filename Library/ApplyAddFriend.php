@@ -42,8 +42,8 @@ class ApplyAddFriend
             $result     = Helper::getDataFromProxy($params);
             $log->info($result);
             $siteUserId = $result['site_user_id'];
-            $friendId   = $result['data']['site_user_id'];
-            $reason     = $result['data']['apply_reason'];
+            $friendId   = isset($result['data']['site_user_id']) ? $result['data']['site_user_id']: "";
+            $reason     = isset($result['data']['apply_reason']) ? $result['data']['apply_reason'] : '';
             $log->info([$siteUserId, $friendId, $reason]);
             return self::sendApplyFriendRequest($siteUserId, $friendId, $reason, $applyFriendUrl);
         } catch (\Exception $e) {

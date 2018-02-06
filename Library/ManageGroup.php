@@ -61,8 +61,9 @@ class ManageGroup
             $groupListReq->setPageSize($pageSize);
             $groupListReq = $groupListReq->serializeToString();
             $groupListReq = Helper::generateDataForProxy($siteUserId, $groupListReq);
-            $curl =  Curl::init();
-            $result = $curl->request('post', $groupListUrl, $groupListReq);
+
+            $curl    =  Curl::init();
+            $result  = $curl->request('post', $groupListUrl, $groupListReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
                 throw new \Exception('获取群组列表失败');
