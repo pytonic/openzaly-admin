@@ -30,6 +30,7 @@ class Log
 
 	public function info($params = [])
 	{
+		$this->_logType = 'INFO'
 		$this->writeLog($params);
 	}
 
@@ -65,8 +66,8 @@ class Log
 				$params = json_encode($params);
 			}
 			$logContent ="【".$this->_logType."】【" . date('Y-m-d H:i:s', time()) . " 】【  " . $params . " 】";
-			$fileName = $this->generateLogFile();
-			$handler = fopen($fileName, 'a+');
+			$fileName   = $this->generateLogFile();
+			$handler    = fopen($fileName, 'a+');
 			fwrite($handler, $logContent);
 			fwrite($handler, "\n");
 			fclose($handler);
