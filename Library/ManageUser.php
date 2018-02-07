@@ -256,7 +256,10 @@ class ManageUser
             if (count($output) >= 12) {
                 $loading = false;
             }
-            return ["data" => $output, "loading" => $loading];
+            $output = ["data" => $output, "loading" => $loading];
+            $log->info('获取结果');
+            $log->info($output);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);

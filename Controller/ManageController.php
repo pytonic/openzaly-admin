@@ -53,11 +53,8 @@ class ManageController extends BaseController
     public function basicAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('获取站点基本设置');
         $getConfigUrl = $this->config['base']['get_site_config_url'];
-        $this->log->info([$params, $getConfigUrl]);
         $configs = ManageBasic::getBasicConfig($params, $getConfigUrl);
-        $this->log->info($configs);
         echo $this->render('platform/basic/setBasic', $configs);
     }
     /**
@@ -69,8 +66,6 @@ class ManageController extends BaseController
     public function setBasicAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('修改站点基本设置');
-        $this->log->info($params);
         $setSiteConfigUrl = $this->config['base']['set_site_config_url'];
         echo  ManageBasic::setBasicConfig($params, $setSiteConfigUrl);
     }

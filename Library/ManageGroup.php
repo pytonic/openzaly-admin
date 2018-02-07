@@ -82,6 +82,7 @@ class ManageGroup
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' => $loading];
+            $log->info('数据结果');
             $log->info($output);
             return $output;
         } catch (\Exception $e) {
@@ -142,6 +143,7 @@ class ManageGroup
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' => $loading, 'group_id' => $groupId];
+            $log->info('获取结果');
             $log->info($output);
             return $output;
         } catch (\Exception $e) {
@@ -174,7 +176,7 @@ class ManageGroup
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
-            return ['group_id' => ''];
+            return ['group_id' => '', 'group_name' => ''];
         }
     }
     /**
@@ -204,6 +206,8 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $removeGroupUserUrl, $removeMemberReq);
             $results = Helper::getDataFromPlugin($result);
+            $log->info('获取结果');
+            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('删除群成员失败');
             }
@@ -241,6 +245,8 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $addUserToGroupUrl, $addMemberReq);
             $results = Helper::getDataFromPlugin($result);
+            $log->info('获取结果');
+            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('删除群成员失败');
             }
@@ -279,7 +285,7 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $disbandGroupUrl, $disbandGroupReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('获取解散结果');
+            $log->info('获取结果');
             $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('解散群失败');
@@ -317,8 +323,6 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $groupInfoUrl, $groupProfileReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('得到群信息结果');
-            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('得到群信息失败');
             }
@@ -332,6 +336,7 @@ class ManageGroup
                     'group_icon'   => $groupProfile->getIcon(),
                     'group_notice' => $groupProfile->getGroupNotice(),
             ];
+            $log->info('获取结果');
             $log->info($list);
             return $list;
         } catch (\Exception $e) {
@@ -355,12 +360,10 @@ class ManageGroup
             $log->info('修改群信息');
             $log->info($params);
             $result = Helper::getDataFromProxy($params);
-            $log->info($result);
-
             $siteUserId  = $result['site_user_id'];
-            $groupName   = $result['data']['group_name'];
-            $groupId     = $result['data']['group_id'];
-            $groupIcon   = $result['data']['group_icon'];
+            $groupName   = isset($result['data']['group_name']) ? $result['data']['group_name'] : '';
+            $groupId     = isset($result['data']['group_id']) ? $result['data']['group_id'] : '';
+            $groupIcon   = isset($result['data']['group_icon']) ? $result['data']['group_icon'] : '';
             $groupNotice = isset($result['data']['group_notice']) ? $result['data']['group_notice'] : '';
 
             $groupProfile = new GroupProfile();
@@ -376,6 +379,8 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $updateGroupInfoUrl, $groupUpdateReq);
             $results = Helper::getDataFromPlugin($result);
+            $log->info("获取结果");
+            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('修改群信息');
             }
@@ -432,6 +437,7 @@ class ManageGroup
             if (count($output) >= 12) {
                 $loading = false;
             }
+            $log->info("获取结果");
             $log->info($output);
             return ["data" => $output, "loading" => $loading, 'group_id' => $groupId];
         } catch (\Exception $e) {

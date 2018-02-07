@@ -24,7 +24,6 @@ use Library\Plugin\HaiUicCreateRequest;
 use Library\Plugin\UicStatus;
 use Zaly\Curl;
 use Zaly\Log;
-use Zaly\Config;
 use Library\Helper;
 
 class ManageInviteCode
@@ -59,10 +58,8 @@ class ManageInviteCode
             $uicReq = $uicReq->serializeToString();
             $uicReq = Helper::generateDataForProxy($siteUserId, $uicReq);
 
-            $curl   = Curl::init();
-            $result = $curl->request('post', $getUicUrl, $uicReq);
-            $log->info('获取邀请码结果');
-            $log->info($result);
+            $curl    = Curl::init();
+            $result  = $curl->request('post', $getUicUrl, $uicReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
                 throw new \Exception('获取邀请码列表失败');
@@ -77,11 +74,13 @@ class ManageInviteCode
                 $lists[$key]['use_site_user_name'] = $uic->getUserName();
                 $lists[$key]['code_status'] = $uic->getStatus();
             }
-            $log->info($lists);
             if (count($lists) >= 12) {
                 $loading = false;
             }
-            return ['results' => $lists, 'loading' =>$loading];
+            $output = ['results' => $lists, 'loading' =>$loading];
+            $log->info("获取结果");
+            $log->info($output);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
@@ -109,10 +108,11 @@ class ManageInviteCode
             $uicCreateReq = $uicCreateReq->serializeToString();
             $uicCreateReq = Helper::generateDataForProxy($siteUserId, $uicCreateReq);
 
-            $curl   = Curl::init();
-            $result = $curl->request('post', $generateVerifyUrl, $uicCreateReq);
-            $log->info('获取生成邀请码列表结果');
+            $curl    = Curl::init();
+            $result  = $curl->request('post', $generateVerifyUrl, $uicCreateReq);
             $results = Helper::getDataFromPlugin($result);
+            $log->info("获取结果");
+            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('生成邀请码失败');
             }

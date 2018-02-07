@@ -103,8 +103,7 @@ class SiteMemberLists
             $response  = new HaiUserRelationListResponse();
             $response->mergeFromString($data);
             $userInfos = $response->getUserProfile();
-            $log->info('获取用户数据');
-            $log->info($userInfos);
+
             if ($userInfos) {
                 foreach ($userInfos as $key => $userInfo) {
                     $output[$key]['site_user_relation'] = $userInfo->getRelation();
@@ -117,7 +116,10 @@ class SiteMemberLists
             if (count($output) >= 12) {
                 $loading = false;
             }
-            return ["data" => $output, "loading" => $loading, 'current_site_user_id' => $siteUserId];
+            $output = ["data" => $output, "loading" => $loading, 'current_site_user_id' => $siteUserId];
+            $log->info('获取用户数据');
+            $log->info($output);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);

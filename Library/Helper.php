@@ -34,7 +34,6 @@ class Helper
     {
         $log = \Zaly\Log::init();
         try {
-            $log->info($params);
             $proxyPackage    = new \Library\Plugin\ProxyPackage();
             $proxyPackage->mergeFromString($params);
             $currentUserMap  = $proxyPackage->getProxyContent();
@@ -93,19 +92,16 @@ class Helper
     {
         $log = \Zaly\Log::init();
         try {
-            $log->info($params);
-
             $pluginPackage  = new \Library\Plugin\PluginPackage();
             $pluginPackage->mergeFromString($params);
             $errorInfo = $pluginPackage->getErrorInfo();
             if ($errorInfo) {
                 $errorCode = $errorInfo->getCode();
-                $log->error([$errorInfo, $errorCode]);
                 if ($errorCode == 'success') {
                     $data = $pluginPackage->getData();
                     return ['error' => 'success', 'data' => $data];
                 }
-                return ["error" => 'fail'];
+                throw new \Exception('获取数据失败');
             }
             return ['error' => 'success', 'data' => []];
         } catch (\Exception $e) {
@@ -133,6 +129,7 @@ class Helper
             $configReq = new \Library\Plugin\HaiSiteGetConfigRequest();
             $configReq = $configReq->serializeToString();
             $configReq = Helper::generateDataForProxy($siteUserId, $configReq);
+
             $curl   = \Zaly\Curl::init();
             $result = $curl->request('post', $getConfigUrl, $configReq);
             $result = Helper::getDataFromPlugin($result);
@@ -153,8 +150,7 @@ class Helper
             }
             return false;
         } catch (\Exception $ex) {
-            $log = \Zaly\Log::init();
-            $log->info($params);
+            $log->error($params);
             return false;
         }
     }

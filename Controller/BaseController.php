@@ -30,7 +30,6 @@ class BaseController
     {
         $params  = file_get_contents("php://input");
         $getConfigUrl = $this->config['base']['get_site_config_url'];
-        $this->log->info([$params, $getConfigUrl]);
         $isAdmin = Helper::judgeIsAdmin($params, $getConfigUrl);
         if ($isAdmin !== true) {
             echo $this->render('platform/error');

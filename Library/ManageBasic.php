@@ -46,9 +46,10 @@ class ManageBasic
      */
     public static function getBasicConfig($params, $getConfigUrl)
     {
-        $log    = Log::init();
+        $log = Log::init();
 
         try {
+            $log->info("获取基本配置");
             $result = Helper::getDataFromProxy($params);
             $siteUserId = $result['site_user_id'];
             $configReq  = new HaiSiteGetConfigRequest();
@@ -100,7 +101,7 @@ class ManageBasic
                     'u2_encryption_status' => isset($configObjs[ConfigKey::U2_ENCRYPTION_STATUS]) ? $configObjs[ConfigKey::U2_ENCRYPTION_STATUS] : 1,
                 ];
             }
-            $log->info('得到站点的数据结果');
+            $log->info("获取结果");
             $log->info($siteConfig);
             return $siteConfig;
         } catch (\Exception $e) {
@@ -142,11 +143,9 @@ class ManageBasic
                     $upData[$keyname] = $val;
                 }
             }
-            $log->info('更新数据源');
-            $log->info($upData);
+           
             $siteBackConfig = new SiteBackConfig();
             $siteBackConfig->setSiteConfig($upData);
-            $log->info($upData);
             $configReq = new HaiSiteUpdateConfigRequest();
             $configReq->setSiteConfig($siteBackConfig);
             $configReq = $configReq->serializeToString();
@@ -154,7 +153,7 @@ class ManageBasic
 
             $curl   = Curl::init();
             $result = $curl->request('post', $setSiteConfigUrl, $configReq);
-            $log->info('获取更新结果');
+            $log->info("获取结果");
             $log->info($result);
             if ($result == 'error') {
                 throw new \Exception('更新站点信息失败');

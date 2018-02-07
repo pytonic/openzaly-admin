@@ -54,7 +54,6 @@ class ManagePluginController extends BaseController
     public function pluginListAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $pluginListUrl = $this->config['base']['plugin_list_url'];
         $results = ManagePlugin::pluginList($params, $pluginListUrl, $this->pageSize);
         echo $this->render('platform/plugin/list', $results);
@@ -68,7 +67,6 @@ class ManagePluginController extends BaseController
     public function pullPluginListAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $pluginListUrl = $this->config['base']['plugin_list_url'];
         $results = ManagePlugin::pluginList($params, $pluginListUrl, $this->pageSize);
         echo json_encode($results);
@@ -97,7 +95,6 @@ class ManagePluginController extends BaseController
     public function addPluginAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $pluginAddUrl = $this->config['base']['plugin_add_url'];
         $results = ManagePlugin::addPlugin($params, $pluginAddUrl);
         echo $results;
@@ -114,7 +111,6 @@ class ManagePluginController extends BaseController
     public function deletePluginAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $delPluginUrl = $this->config['base']['plugin_delete_url'];
         $results = ManagePlugin::deletePlugin($params, $delPluginUrl);
         echo $results;
@@ -131,7 +127,6 @@ class ManagePluginController extends BaseController
     public function updatePluginAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $updatePluginUrl = $this->config['base']['plugin_update_url'];
         $results = ManagePlugin::updatePlugin($params, $updatePluginUrl);
         echo $results;
@@ -148,7 +143,6 @@ class ManagePluginController extends BaseController
     public function pluginInfoAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $pluginInfoUrl = $this->config['base']['plugin_profile_url'];
         $results = ManagePlugin::pluginInfo($params, $pluginInfoUrl);
         if (count($results)) {

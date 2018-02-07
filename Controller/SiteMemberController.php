@@ -43,7 +43,6 @@ class SiteMemberController extends BaseController
      */
     public function membersAction()
     {
-        $this->log->info('获取用户数据');
         $siteUserId = $this->request->get('siteUserId');
         $results    = $this->getMembersFromSite($siteUserId);
         $results['site_user_id'] = $siteUserId;
@@ -57,7 +56,6 @@ class SiteMemberController extends BaseController
      */
     protected function getMembersFromSite($siteUserId, $page = 1)
     {
-        $this->log->info('获取用户数据');
         $getMembersUrl = $this->config['base']['member_relation_list_site'];
         $pageSize = $this->config['base']['page_size'];
         return  SiteMemberLists::getMembersFromSite($siteUserId, $getMembersUrl, $page, $pageSize);
@@ -71,8 +69,6 @@ class SiteMemberController extends BaseController
     public function applyAddFriendAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('申请添加好友');
-        $this->log->info($params);
         $applyFriendUrl  = $this->config['base']['apply_friend_url'];
         $result = ApplyAddFriend::handleApplyAddFriendRequest($params, $applyFriendUrl);
         echo  $result;
@@ -87,11 +83,9 @@ class SiteMemberController extends BaseController
     {
         try {
             $params  = file_get_contents("php://input");
-            $this->log->info('拉取站点用户列表');
             $getMembersUrl = $this->config['base']['member_relation_list_site'];
             $pageSize = $this->config['base']['page_size'];
-            $results = SiteMemberLists::getListsByProxy($params, $getMembersUrl, $pageSize);
-            $this->log->info($results);
+            $results  = SiteMemberLists::getListsByProxy($params, $getMembersUrl, $pageSize);
             echo json_encode($results, JSON_UNESCAPED_UNICODE);
         } catch (\Exception $ex) {
             echo [];

@@ -72,7 +72,7 @@ class ApplyAddFriend
             $friendApplyRequest  = new HaiFriendApplyRequest();
             $friendApplyRequest->setSiteFriendId($friendId);
             $friendApplyRequest->setApplyReason($reason);
-            $msgPacked  = $friendApplyRequest->serializeToString();
+            $msgPacked = $friendApplyRequest->serializeToString();
             $msgPacked = Helper::generateDataForProxy($siteUserId, $msgPacked);
 
             $curl    = Curl::init();
@@ -84,7 +84,7 @@ class ApplyAddFriend
             }
             return "success";
         } catch (\Exception $ex) {
-            $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
+            $message = sprintf("msg:%s file:%s:%d", $ex->getMessage(), $ex->getFile(), $ex->getLine());
             $log->error($message);
             return "fail";
         }

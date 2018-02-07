@@ -43,9 +43,7 @@ class ManageUserController extends BaseController
         $getMembersUrl = $this->config['base']['member_list_site'];
         $pageSize = $this->config['base']['page_size'];
         $params   = file_get_contents("php://input");
-        $this->log->info('站点成员');
-        $this->log->info($params);
-        $results = ManageUser::getSiteUsers($params, $getMembersUrl, $pageSize);
+        $results  = ManageUser::getSiteUsers($params, $getMembersUrl, $pageSize);
         echo $this->render('platform/user/index', $results);
     }
     /**
@@ -57,8 +55,6 @@ class ManageUserController extends BaseController
     public function pullSiteUsersAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('拉取站点用户');
-        $this->log->info($params);
         $getMembersUrl = $this->config['base']['member_list_site'];
         $pageSize = $this->config['base']['page_size'];
         $results  = ManageUser::getSiteUsers($params, $getMembersUrl, $pageSize);
@@ -73,8 +69,6 @@ class ManageUserController extends BaseController
     public function sealupSiteUserAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('管理站点用户状态');
-        $this->log->info($params);
         $sealupSiteUserUrl = $this->config['base']['sealup_site_user_url'];
         echo  ManageUser::sealupSiteUser($params, $sealupSiteUserUrl);
     }
@@ -87,11 +81,8 @@ class ManageUserController extends BaseController
     public function getSiteUserInfoAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('查看用户信息');
-        $this->log->info($params);
         $userInfoUrl = $this->config['base']['site_user_info_url'];
         $info =  ManageUser::getSiteUserInfo($params, $userInfoUrl);
-        $this->log->info($info);
         if (count($info)>0) {
             echo $this->render('platform/user/update', $info);
         } else {
@@ -107,8 +98,6 @@ class ManageUserController extends BaseController
     public function updateSiteUserInfoAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('更新用户信息');
-        $this->log->info($params);
         $updateSiteUserUrl = $this->config['base']['update_site_user_url'];
         echo  ManageUser::updateSiteUserInfo($params, $updateSiteUserUrl);
     }
@@ -121,11 +110,8 @@ class ManageUserController extends BaseController
     public function searchUserAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('查找用户');
-        $this->log->info($params);
         $searchUserUrl = $this->config['base']['search_site_user_url'];
-        $results =  ManageUser::searchUserInfo($params, $searchUserUrl);
-        $this->log->info($info);
+        $results = ManageUser::searchUserInfo($params, $searchUserUrl);
         echo json_encode($results);
     }
 }

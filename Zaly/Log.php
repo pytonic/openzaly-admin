@@ -30,7 +30,7 @@ class Log
 
 	public function info($params = [])
 	{
-		$this->_logType = 'INFO'
+		$this->_logType = 'INFO';
 		$this->writeLog($params);
 	}
 
@@ -57,7 +57,6 @@ class Log
 	{
 		$this->_logPath = isset(self::$config['base']['log_path']) ? self::$config['base']['log_path'] : dirname(__DIR__).'/logs/';
 	}
-
 
 	protected function writeLog($params)
 	{

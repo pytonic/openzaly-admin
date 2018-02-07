@@ -54,10 +54,9 @@ class ManageInviteCodeController extends BaseController
      */
     public function codeUnusedListAction()
     {
-        $params  = file_get_contents("php://input");
-        $this->log->info($params);
+        $params = file_get_contents("php://input");
         $uidUrl = $this->config['base']['uic_list_url'];
-        $lists = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
+        $lists  = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
         echo $this->render('platform/code/unused_list', $lists);
     }
     /**
@@ -68,10 +67,9 @@ class ManageInviteCodeController extends BaseController
      */
     public function codeUsedListAction()
     {
-        $params  = file_get_contents("php://input");
-        $this->log->info($params);
+        $params = file_get_contents("php://input");
         $uidUrl = $this->config['base']['uic_list_url'];
-        $lists = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
+        $lists  = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
         echo $this->render('platform/code/used_list', $lists);
     }
     /**
@@ -83,7 +81,6 @@ class ManageInviteCodeController extends BaseController
     public function pullInviteCodeAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $uidUrl = $this->config['base']['uic_list_url'];
         $lists  = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
         echo json_encode($lists);
@@ -97,7 +94,6 @@ class ManageInviteCodeController extends BaseController
     public function generateInviteCodeAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $generateVerifyUrl = $this->config['base']['uic_generate_url'];
         $lists = ManageInviteCode::generateVerifyCodes($params, $generateVerifyUrl);
         echo $lists;

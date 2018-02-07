@@ -41,7 +41,6 @@ class ManageGroupController extends BaseController
     public function indexAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $groupListUrl = $this->config['base']['group_list_url'];
         $pageSize = $this->config['base']['page_size'];
         $lists = ManageGroup::getGroupLists($params, $groupListUrl, $pageSize);
@@ -57,7 +56,6 @@ class ManageGroupController extends BaseController
     public function pullListAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $groupListUrl = $this->config['base']['group_list_url'];
         $pageSize = $this->config['base']['page_size'];
         $lists = ManageGroup::getGroupLists($params, $groupListUrl, $pageSize);
@@ -72,8 +70,6 @@ class ManageGroupController extends BaseController
     public function groupAdminAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
-        $pageSize = $this->config['base']['group_admin_page_size'];
         $results = ManageGroup::getGroupId($params);
         echo $this->render('platform/group/groupAdmin', $results);
     }
@@ -87,8 +83,6 @@ class ManageGroupController extends BaseController
     public function groupMembersAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('群成员列表');
-        $this->log->info($params);
         $pageSize = $this->config['base']['page_size'];
         $groupMembersUrl = $this->config['base']['group_members_url'];
         $results = ManageGroup::getGroupMembers($params, $groupMembersUrl, $pageSize);
@@ -103,8 +97,6 @@ class ManageGroupController extends BaseController
     public function pullGroupMembersAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('拉取群成员列表');
-        $this->log->info($params);
         $pageSize = $this->config['base']['page_size'];
         $groupMembersUrl = $this->config['base']['group_members_url'];
         $results = ManageGroup::getGroupMembers($params, $groupMembersUrl, $pageSize);
@@ -119,8 +111,6 @@ class ManageGroupController extends BaseController
     public function removeGroupMemberAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('删除群成员');
-        $this->log->info($params);
         $removeGroupMemberUrl = $this->config['base']['group_remove_members_url'];
         echo ManageGroup::removeGroupMember($params, $removeGroupMemberUrl);
     }
@@ -133,8 +123,6 @@ class ManageGroupController extends BaseController
     public function addGroupUserAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('添加群成员');
-        $this->log->info($params);
         $addUserToGroupUrl = $this->config['base']['group_add_members_url'];
         echo ManageGroup::addGroupUser($params, $addUserToGroupUrl);
     }
@@ -148,7 +136,6 @@ class ManageGroupController extends BaseController
     public function groupInfoAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $groupInfoUrl = $this->config['base']['group_info_url'];
         $results = ManageGroup::getGroupInfo($params, $groupInfoUrl);
         echo $this->render('platform/group/groupInfo', $results);
@@ -162,8 +149,6 @@ class ManageGroupController extends BaseController
     public function setGroupInfoAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('修改群信息');
-        $this->log->info($params);
         $updateGroupUrl = $this->config['base']['group_update_url'];
         echo ManageGroup::setGroupInfo($params, $updateGroupUrl);
     }
@@ -177,8 +162,6 @@ class ManageGroupController extends BaseController
     public function disbandGroupAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info('解散群');
-        $this->log->info($params);
         $disbandGroupUrl = $this->config['base']['group_delete_url'];
         echo ManageGroup::disbandGroup($params, $disbandGroupUrl);
     }
@@ -194,7 +177,6 @@ class ManageGroupController extends BaseController
         $getMembersUrl = $this->config['base']['group_nonmember_list_site'];
         $pageSize = $this->config['base']['page_size'];
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $results = ManageGroup::getSiteUsers($params, $getMembersUrl, $pageSize);
         echo $this->render('platform/group/siteUser', $results);
     }
@@ -207,7 +189,6 @@ class ManageGroupController extends BaseController
     public function pullSiteUsersAction()
     {
         $params  = file_get_contents("php://input");
-        $this->log->info($params);
         $getMembersUrl = $this->config['base']['group_nonmember_list_site'];
         $pageSize = $this->config['base']['page_size'];
         $results  = ManageGroup::getSiteUsers($params, $getMembersUrl, $pageSize);

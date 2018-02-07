@@ -81,7 +81,10 @@ class ManagePlugin
             if (count($lists) >= 12) {
                 $loading = false;
             }
-            return ['results' => $lists, 'loading' => $loading];
+            $output = ['results' => $lists, 'loading' => $loading];
+            $log->info("获取结果");
+            $log->info($output);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
@@ -114,7 +117,7 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $delPluginUrl, $delPluginReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('删除插件结果');
+            $log->info("获取结果");
             $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('删除插件失败');
@@ -150,7 +153,7 @@ class ManagePlugin
             $status     = isset($result['data']['plugin_status']) ? $result['data']['plugin_status'] : 0;
             $pluginIcon = isset($result['data']['plugin_icon']) ? $result['data']['plugin_icon'] : '';
             $status = constant(PluginStatus::class.'::'.strtoupper($status));
-            $log->info(['status', $status]);
+
             $pluginProfile = new PluginProfile();
             $pluginProfile->setStatus($status);
             $pluginProfile->setId($pluginId);
@@ -166,7 +169,7 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $updatePluginUrl, $upPluginReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('更新插件结果');
+            $log->info("获取结果");
             $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('更新插件失败');
@@ -213,7 +216,7 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $pluginAddUrl, $pluginAddReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('添加插件结果');
+            $log->info("获取结果");
             $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('添加插件失败');
@@ -250,8 +253,6 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $pluginInfoUrl, $pluginInfoReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('插件信息结果');
-            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('获取插件信息结果失败');
             }
@@ -267,6 +268,8 @@ class ManagePlugin
             $lists['url_api']       = $pluginInfo->getUrlApi();
             $lists['plugin_icon']   = $pluginInfo->getIcon();
             $lists['plugin_status'] = $pluginInfo->getStatus();
+
+            $log->info("获取结果");
             $log->info($lists);
             return $lists;
         } catch (\Exception $e) {
