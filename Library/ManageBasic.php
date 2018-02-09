@@ -47,22 +47,26 @@ class ManageBasic
     public static function getBasicConfig($params, $getConfigUrl)
     {
         $log = Log::init();
-
+        $logText = [
+            'msg'    => 'get site basic',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info("获取基本配置");
-            $result = Helper::getDataFromProxy($params);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $siteUserId = $result['site_user_id'];
             $configReq  = new HaiSiteGetConfigRequest();
             $configReq  = $configReq->serializeToString();
             $configReq  = Helper::generateDataForProxy($siteUserId, $configReq);
 
-            $curl   = Curl::init();
-            $result = $curl->request('post', $getConfigUrl, $configReq);
-            $result = Helper::getDataFromPlugin($result);
-            if ($result['error'] == 'fail') {
-                throw new \Exception('出错了');
+            $curl    = Curl::init();
+            $result  = $curl->request('post', $getConfigUrl, $configReq);
+            $results = Helper::getDataFromPlugin($result);
+            if ($results['error'] == 'fail') {
+                throw new \Exception('get data error');
             }
-            $data = $result['data'];
+            $data = $results['data'];
             $siteConfig = [
                 'site_ip'              => '',
                 'site_port'            => '',
@@ -80,29 +84,28 @@ class ManageBasic
             if (isset($data)) {
                 $configRep = new HaiSiteGetConfigResponse();
                 $configRep->mergeFromString($data);
-                $configObjs = $configRep->getSiteConfig();
-                if (!$configObjs) {
+                $configObj = $configRep->getSiteConfig();
+                if (!$configObj) {
+                    $log->info(['not_results_return_default' => $siteConfig]);
                     return $siteConfig;
                 }
-                $configObjs = $configObjs->getSiteConfig();
-
+                $configObjs = $configObj->getSiteConfig();
                 $siteConfig = [
-                    'site_ip'  => isset($configObjs[ConfigKey::SITE_ADDRESS]) ? $configObjs[ConfigKey::SITE_ADDRESS] : '',
-                    'site_port' => isset($configObjs[ConfigKey::SITE_PORT]) ? $configObjs[ConfigKey::SITE_PORT] : '',
-                    'site_http_address' => isset($configObjs[ConfigKey::SITE_HTTP_ADDRESS]) ? $configObjs[ConfigKey::SITE_HTTP_ADDRESS] : '',
-                    'site_http_port' => isset($configObjs[ConfigKey::SITE_HTTP_PORT]) ? $configObjs[ConfigKey::SITE_HTTP_PORT] : '',
-                    'site_name' => isset($configObjs[ConfigKey::SITE_NAME]) ? $configObjs[ConfigKey::SITE_NAME] : '',
-                    'site_logo' => isset($configObjs[ConfigKey::SITE_LOGO]) ? $configObjs[ConfigKey::SITE_LOGO] : '',
-                    'site_desc' => isset($configObjs[ConfigKey::SITE_INTRODUCTION]) ? $configObjs[ConfigKey::SITE_INTRODUCTION] : '',
-                    'site_reister_way' => isset($configObjs[ConfigKey::REGISTER_WAY]) ? $configObjs[ConfigKey::REGISTER_WAY] : 0,
-                    'pic_size' => isset($configObjs[ConfigKey::PIC_SIZE]) ? $configObjs[ConfigKey::PIC_SIZE] : 1,
-                    'pic_path' => isset($configObjs[ConfigKey::PIC_PATH]) ? $configObjs[ConfigKey::PIC_PATH] : '/akaxin',
-                    'group_members_count' => isset($configObjs[ConfigKey::GROUP_MEMBERS_COUNT]) ? $configObjs[ConfigKey::GROUP_MEMBERS_COUNT] : 100,
+                    'site_ip'              => isset($configObjs[ConfigKey::SITE_ADDRESS]) ? $configObjs[ConfigKey::SITE_ADDRESS] : '',
+                    'site_port'            => isset($configObjs[ConfigKey::SITE_PORT]) ? $configObjs[ConfigKey::SITE_PORT] : '',
+                    'site_http_address'    => isset($configObjs[ConfigKey::SITE_HTTP_ADDRESS]) ? $configObjs[ConfigKey::SITE_HTTP_ADDRESS] : '',
+                    'site_http_port'       => isset($configObjs[ConfigKey::SITE_HTTP_PORT]) ? $configObjs[ConfigKey::SITE_HTTP_PORT] : '',
+                    'site_name'            => isset($configObjs[ConfigKey::SITE_NAME]) ? $configObjs[ConfigKey::SITE_NAME] : '',
+                    'site_logo'            => isset($configObjs[ConfigKey::SITE_LOGO]) ? $configObjs[ConfigKey::SITE_LOGO] : '',
+                    'site_desc'            => isset($configObjs[ConfigKey::SITE_INTRODUCTION]) ? $configObjs[ConfigKey::SITE_INTRODUCTION] : '',
+                    'site_reister_way'     => isset($configObjs[ConfigKey::REGISTER_WAY]) ? $configObjs[ConfigKey::REGISTER_WAY] : 0,
+                    'pic_size'             => isset($configObjs[ConfigKey::PIC_SIZE]) ? $configObjs[ConfigKey::PIC_SIZE] : 1,
+                    'pic_path'             => isset($configObjs[ConfigKey::PIC_PATH]) ? $configObjs[ConfigKey::PIC_PATH] : '/akaxin',
+                    'group_members_count'  => isset($configObjs[ConfigKey::GROUP_MEMBERS_COUNT]) ? $configObjs[ConfigKey::GROUP_MEMBERS_COUNT] : 100,
                     'u2_encryption_status' => isset($configObjs[ConfigKey::U2_ENCRYPTION_STATUS]) ? $configObjs[ConfigKey::U2_ENCRYPTION_STATUS] : 1,
                 ];
             }
-            $log->info("获取结果");
-            $log->info($siteConfig);
+            $log->info(['return_results' => $siteConfig]);
             return $siteConfig;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -121,13 +124,17 @@ class ManageBasic
     public static function setBasicConfig($params, $setSiteConfigUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'get site basic',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $result = Helper::getDataFromProxy($params);
-            $log->info($params);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $siteUserId = $result['site_user_id'];
-            $data = $result['data'];
-            $log->info($data);
-            $upData = [];
+            $data       = $result['data'];
+            $upData     = [];
             foreach ($data as $key => $val) {
                 $val = mb_convert_encoding($val, 'utf-8');
                 $keyname = constant(ConfigKey::class.'::'.strtoupper($key));
@@ -143,25 +150,21 @@ class ManageBasic
                     $upData[$keyname] = $val;
                 }
             }
-           
+
             $siteBackConfig = new SiteBackConfig();
             $siteBackConfig->setSiteConfig($upData);
-            $configReq = new HaiSiteUpdateConfigRequest();
+            $configReq      = new HaiSiteUpdateConfigRequest();
             $configReq->setSiteConfig($siteBackConfig);
-            $configReq = $configReq->serializeToString();
-            $configReq = Helper::generateDataForProxy($siteUserId, $configReq);
+            $configReq      = $configReq->serializeToString();
+            $configReq      = Helper::generateDataForProxy($siteUserId, $configReq);
 
             $curl   = Curl::init();
             $result = $curl->request('post', $setSiteConfigUrl, $configReq);
-            $log->info("获取结果");
-            $log->info($result);
-            if ($result == 'error') {
-                throw new \Exception('更新站点信息失败');
+            $results = Helper::getDataFromPlugin($result);
+            if ($results['error'] == 'fail') {
+                throw new \Exception('update site info failed');
             }
-            $params = Helper::getDataFromPlugin($result);
-            if ($params['error'] == 'fail') {
-                throw new \Exception('更新站点信息失败');
-            }
+            $log->info(['return_results' => 'success']);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());

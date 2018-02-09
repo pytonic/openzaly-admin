@@ -48,14 +48,18 @@ class ManageGroup
      */
     public static function getGroupLists($params, $groupListUrl, $pageSize = 12)
     {
-        $log    = Log::init();
+        $log     = Log::init();
         $loading = true;
+        $logText = [
+            'msg' => 'get site group list',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取站点群组列表');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info($result);
             $page = isset($result['data']['page']) ? $result['data']['page'] : 1;
-            $siteUserId = $result['site_user_id'];
+            $siteUserId   = $result['site_user_id'];
             $groupListReq = new HaiGroupListRequest();
             $groupListReq->setPageNumber($page);
             $groupListReq->setPageSize($pageSize);
@@ -71,10 +75,10 @@ class ManageGroup
             $data = $results['data'];
             $groupListRep = new HaiGroupListResponse();
             $groupListRep->mergeFromString($data);
-            $groupLists = $groupListRep->getGroupProfile();
+            $groupLists   = $groupListRep->getGroupProfile();
             $lists = [];
             foreach ($groupLists as $key => $group) {
-                $lists[$key]['group_id'] = $group->getGroupId();
+                $lists[$key]['group_id']   = $group->getGroupId();
                 $lists[$key]['group_name'] = $group->getGroupName();
                 $lists[$key]['group_icon'] = $group->getGroupIcon();
             }
@@ -82,8 +86,7 @@ class ManageGroup
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' => $loading];
-            $log->info('数据结果');
-            $log->info($output);
+            $log->info(['return_results' => $output]);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -103,11 +106,15 @@ class ManageGroup
     {
         $log    = Log::init();
         $loading = true;
+        $logText = [
+            'msg' => 'get group members',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取群下面的成员');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
             $log->info($result);
-
             $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
             $groupId    = isset($result['data']['group_id']) ? $result['data']['group_id'] : '';
             $page       = isset($result['data']['page']) ? $result['data']['page'] : 1;
@@ -122,6 +129,7 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $groupMembersUrl, $groupMemberReq);
             $results = Helper::getDataFromPlugin($result);
+            $log->info(['get_results' => $results]);
             if ($results['error'] == 'fail') {
                 throw new \Exception('获取群成员失败');
             }
@@ -143,8 +151,7 @@ class ManageGroup
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' => $loading, 'group_id' => $groupId];
-            $log->info('获取结果');
-            $log->info($output);
+            $log->info(['return_results' => $output]);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -165,14 +172,20 @@ class ManageGroup
     {
         $log    = Log::init();
         $loading = true;
+        $logText = [
+            'msg'    => 'get group id',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取群id');
-            $result = Helper::getDataFromProxy($params);
-            $log->info($result);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $siteUserId = $result['site_user_id'];
-            $groupId    = $result['data']['group_id'];
-            $groupName  = $result['data']['group_name'];
-            return ['group_id' => $groupId, 'group_name' => $groupName];
+            $groupId    = isset($result['data']['group_id']) ? $result['data']['group_id'] : '';
+            $groupName  = isset($result['data']['group_name']) ? $result['data']['group_name'] : '';
+            $output     = ['group_id' => $groupId, 'group_name' => $groupName];
+            $log->info(['return_results' => $output]);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
@@ -189,28 +202,31 @@ class ManageGroup
      */
     public static function removeGroupMember($params, $removeGroupUserUrl)
     {
-        $log    = Log::init();
+        $log     = Log::init();
+        $logText = [
+            'msg'    => 'delete group member',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('删除群成员');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info($result);
             $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
-            $removeSiteUserId = $result['data']['remove_site_user_id'];
-            $groupId = $result['data']['group_id'];
-            $removeMemberReq = new HaiGroupRemoveMemberRequest();
+            $removeSiteUserId = isset($result['data']['remove_site_user_id']) ? $result['data']['remove_site_user_id'] : '';
+            $groupId          = isset($result['data']['group_id']) ? $result['data']['group_id'] : '';
+            $removeMemberReq  = new HaiGroupRemoveMemberRequest();
             $removeMemberReq->setGroupId($groupId);
             $removeMemberReq->setGroupMember($removeSiteUserId);
-            $removeMemberReq = $removeMemberReq->serializeToString();
-            $removeMemberReq = Helper::generateDataForProxy($siteUserId, $removeMemberReq);
+            $removeMemberReq  = $removeMemberReq->serializeToString();
+            $removeMemberReq  = Helper::generateDataForProxy($siteUserId, $removeMemberReq);
 
             $curl    = Curl::init();
             $result  = $curl->request('post', $removeGroupUserUrl, $removeMemberReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('获取结果');
-            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('删除群成员失败');
             }
+            $log->info(['return_results' => 'success']);
             return "success";
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -229,27 +245,30 @@ class ManageGroup
     public static function addGroupUser($params, $addUserToGroupUrl)
     {
         $log    = Log::init();
+        $logText = [
+            'msg'    => 'add site member to  group',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('添加群成员');
-            $result = Helper::getDataFromProxy($params);
-            $log->info($result);
-            $groupId = $result['data']['group_id'];
+            $log->info($logText);
+            $result        = Helper::getDataFromProxy($params);
+            $groupId       = $result['data']['group_id'];
             $addSiteUserId = $result['data']['add_site_user_id'];
             $siteUserId    = $result['site_user_id'];
             $addMemberReq  = new HaiGroupAddMemberRequest();
             $addMemberReq->setGroupId($groupId);
             $addMemberReq->setGroupMember($addSiteUserId);
-            $addMemberReq = $addMemberReq->serializeToString();
-            $addMemberReq = Helper::generateDataForProxy($siteUserId, $addMemberReq);
+            $addMemberReq  = $addMemberReq->serializeToString();
+            $addMemberReq  = Helper::generateDataForProxy($siteUserId, $addMemberReq);
 
             $curl    = Curl::init();
             $result  = $curl->request('post', $addUserToGroupUrl, $addMemberReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('获取结果');
-            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('删除群成员失败');
             }
+            $log->info(['return_results' => 'success']);
             return "success";
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -269,12 +288,16 @@ class ManageGroup
     public static function disbandGroup($params, $disbandGroupUrl)
     {
         $log    = Log::init();
+        $logText = [
+            'msg'    => 'disband group',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('解散群');
-            $log->info($disbandGroupUrl);
-            $result = Helper::getDataFromProxy($params);
-            $siteUserId = $result['site_user_id'];
-            $groupId    = $result['data']['group_id'];
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
+            $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
+            $groupId    = isset($result['data']['group_id']) ? $result['data']['group_id'] : '';
 
             $disbandGroupReq = new HaiGroupDeleteRequest();
             $disbandGroupReq->setGroupId($groupId);
@@ -285,11 +308,11 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $disbandGroupUrl, $disbandGroupReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info('获取结果');
-            $log->info($results);
+            $log->info(['get_results' => $results]);
             if ($results['error'] == 'fail') {
                 throw new \Exception('解散群失败');
             }
+            $log->info(['return_results' => 'success']);
             return "success";
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -308,10 +331,14 @@ class ManageGroup
     public static function getGroupInfo($params, $groupInfoUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'get group info',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('得到群信息');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info($result);
             $siteUserId = $result['site_user_id'];
             $groupId    = isset($result['data']['group_id']) ?$result['data']['group_id'] : '' ;
 
@@ -324,20 +351,21 @@ class ManageGroup
             $result  = $curl->request('post', $groupInfoUrl, $groupProfileReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('得到群信息失败');
+                throw new \Exception('get group info failed');
             }
             $data = $results['data'];
+
             $groupProfileRep = new HaiGroupProfileResponse();
             $groupProfileRep->mergeFromString($data);
-            $groupProfile = $groupProfileRep->getProfile();
+            $groupProfile    = $groupProfileRep->getProfile();
+
             $list = [
                     'group_name'   => $groupProfile->getName(),
                     'group_id'     => $groupProfile->getId(),
                     'group_icon'   => $groupProfile->getIcon(),
                     'group_notice' => $groupProfile->getGroupNotice(),
             ];
-            $log->info('获取结果');
-            $log->info($list);
+            $log->info(['return_results' => $list]);
             return $list;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -356,9 +384,13 @@ class ManageGroup
     public static function setGroupInfo($params, $updateGroupInfoUrl)
     {
         $log    = Log::init();
+        $logText = [
+            'msg'    => 'update group info',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('修改群信息');
-            $log->info($params);
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
             $siteUserId  = $result['site_user_id'];
             $groupName   = isset($result['data']['group_name']) ? $result['data']['group_name'] : '';
@@ -379,11 +411,10 @@ class ManageGroup
             $curl    = Curl::init();
             $result  = $curl->request('post', $updateGroupInfoUrl, $groupUpdateReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info("获取结果");
-            $log->info($results);
             if ($results['error'] == 'fail') {
-                throw new \Exception('修改群信息');
+                throw new \Exception('update group info failed');
             }
+            $log->info(['return_results' => 'success']);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -402,13 +433,18 @@ class ManageGroup
     public static function getSiteUsers($params, $getMembersUrl, $pageSize)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'get site users not in the group',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $loading = true;
-            $log->info('获取不在群中的站点用户');
-            $result = Helper::getDataFromProxy($params);
-            $groupId    = $result['data']['group_id'];
-            $siteUserId = $result['site_user_id'];
-            $page = isset($result['data']['page']) ? $result['data']['page'] : 1;
+            $log->info($logText);
+            $loading    = true;
+            $result     = Helper::getDataFromProxy($params);
+            $groupId    = isset($result['data']['group_id']) ?  $result['data']['group_id'] : '';
+            $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
+            $page       = isset($result['data']['page']) ? $result['data']['page'] : 1;
 
             $nonmemberReq = new HaiGroupNonmembersRequest();
             $nonmemberReq->setGroupId($groupId);
@@ -421,9 +457,9 @@ class ManageGroup
             $result  = $curl->request('post', $getMembersUrl, $nonmemberReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('获取不在群的站点用户失败');
+                throw new \Exception('get members failed');
             }
-            $data = $results['data'];
+            $data         = $results['data'];
             $nonmemberRep = new HaiGroupNonmembersResponse();
             $nonmemberRep->mergeFromString($data);
             $lists = $nonmemberRep->getGroupMember();
@@ -437,8 +473,7 @@ class ManageGroup
             if (count($output) >= 12) {
                 $loading = false;
             }
-            $log->info("获取结果");
-            $log->info($output);
+            $log->info(['return_results' => $output]);
             return ["data" => $output, "loading" => $loading, 'group_id' => $groupId];
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());

@@ -32,19 +32,26 @@ class Helper
      */
     public static function getDataFromProxy($params)
     {
-        $log = \Zaly\Log::init();
+        $log     = \Zaly\Log::init();
+        $logText = [
+            'msg' => 'get params from proxy',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
+            $log->info($logText);
             $proxyPackage    = new \Library\Plugin\ProxyPackage();
             $proxyPackage->mergeFromString($params);
             $currentUserMap  = $proxyPackage->getProxyContent();
             $siteUserId = 0;
             foreach ($currentUserMap as $key => $currentUserId) {
-                $log->info([$key, $currentUserId]);
                 $siteUserId = $currentUserId;
             }
             $data    = $proxyPackage->getdata();
             $datas   = json_decode($data, true);
-            return ['site_user_id' => $siteUserId, 'data' => $datas];
+            $output  = ['site_user_id' => $siteUserId, 'data' => $datas];
+            $log->info(['recevie_data' => $output]);
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
@@ -65,8 +72,14 @@ class Helper
     public static function generateDataForProxy($siteUserId, $content)
     {
         $log = \Zaly\Log::init();
+        $logText = [
+            'msg'          => 'generate data for proxy',
+            'method'       => __METHOD__,
+            'params'       => $content,
+            'site_user_id' => $siteUserId,
+        ];
         try {
-            $log->info([$siteUserId, $content]);
+            $log->info($logText);
             $proxyPackage    = new \Library\Plugin\ProxyPackage();
             $proxyPackage->setData($content);
             $proxyPackage->setProxyContent(['1' => $siteUserId]);
@@ -91,7 +104,13 @@ class Helper
     public static function getDataFromPlugin($params)
     {
         $log = \Zaly\Log::init();
+        $logText = [
+            'msg'    => 'get params from plugin',
+            'method' => __METHOD__,
+        ];
+
         try {
+            $log->info($logText);
             $pluginPackage  = new \Library\Plugin\PluginPackage();
             $pluginPackage->mergeFromString($params);
             $errorInfo = $pluginPackage->getErrorInfo();
@@ -99,11 +118,13 @@ class Helper
                 $errorCode = $errorInfo->getCode();
                 if ($errorCode == 'success') {
                     $data = $pluginPackage->getData();
-                    return ['error' => 'success', 'data' => $data];
+                    $output = ['error' => 'success', 'data' => $data];
+                    return $output;
                 }
-                throw new \Exception('获取数据失败');
+                throw new \Exception('get data failed');
             }
-            return ['error' => 'success', 'data' => []];
+            $output = ['error' => 'success', 'data' => []];
+            return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
             $log->error($message);
@@ -114,7 +135,14 @@ class Helper
     public static function judgeIsAdmin($params, $getConfigUrl)
     {
         $log = \Zaly\Log::init();
+        $logText = [
+            'msg'    => 'judgment admin',
+            'method' => __METHOD__,
+            'params' => $params
+
+        ];
         try {
+            $log->info($logText);
             if ($params && strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
                 $result = Helper::getDataFromProxy($params);
                 $siteUserId = $result['site_user_id'];
@@ -122,9 +150,8 @@ class Helper
                 $siteUserId = isset($_GET['siteUserId']) ? $_GET['siteUserId'] : '';
             }
             if (!isset($siteUserId) || !$siteUserId) {
-                $log->info('非法进入');
-                $log->info([$params, $getConfigUrl]);
-                throw new \Exception('非法进入');
+                $log->info('no siteUserId, Permission denied');
+                throw new \Exception('Permission denied');
             }
             $configReq = new \Library\Plugin\HaiSiteGetConfigRequest();
             $configReq = $configReq->serializeToString();
@@ -134,14 +161,14 @@ class Helper
             $result = $curl->request('post', $getConfigUrl, $configReq);
             $result = Helper::getDataFromPlugin($result);
             if ($result['error'] == 'fail') {
-                throw new \Exception('获取配置失败');
+                throw new \Exception('get data failed');
             }
             $data = $result['data'];
             $configRep = new \Library\Plugin\HaiSiteGetConfigResponse();
             $configRep->mergeFromString($data);
             $configObjs = $configRep->getSiteConfig();
             if (!$configObjs) {
-                throw new \Exception('获取配置失败');
+                throw new \Exception('get config failed');
             }
             $configObjs = $configObjs->getSiteConfig();
             $adminId = isset($configObjs[ConfigKey::SITE_ADMIN]) ? $configObjs[ConfigKey::SITE_ADMIN] : '' ;
