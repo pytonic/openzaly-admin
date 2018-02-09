@@ -29,10 +29,16 @@ class SiteMemberLists
     public static function getListsByProxy($params, $getMembersUrl, $pageSize = 12)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => "get site member list",
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $params = Helper::getDataFromProxy($params);
+            $log->info($logText);
+            $params     = Helper::getDataFromProxy($params);
             $siteUserId = $params['site_user_id'];
-            $page = $params['data']['page'];
+            $page       = $params['data']['page'];
             return self::getMembersFromSite($siteUserId, $getMembersUrl, $page, $pageSize);
         } catch (\Exception $ex) {
             $message = sprintf("msg:%s file:%s:%d", $ex->getMessage(), $ex->getFile(), $ex->getLine());
@@ -55,8 +61,13 @@ class SiteMemberLists
     public static function getMembersFromSite($siteUserId, $getMembersUrl = '', $page = 1, $pageSize = 20)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => "get site member list",
+            'method' => __METHOD__,
+            'site_user_id' => $siteUserId,
+        ];
         try {
-            $log->info('getMembersFromSite');
+            $log->info($logText);
             return self::getMembersList($siteUserId, $getMembersUrl, $page, $pageSize);
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -79,9 +90,13 @@ class SiteMemberLists
     public static function getMembersList($siteUserId, $getMembersUrl = '', $page = 1, $pageSize = 20)
     {
         $log = Log::init();
+        $logText = [
+            'msg'          => "get site member list",
+            'method'       => __METHOD__,
+            'site_user_id' => $siteUserId,
+        ];
         try {
-            $log->info('获取用户数据');
-            $log->info(['siteUserId'=>$siteUserId]);
+            $log->info($logText);
             $reqMemberLists = new HaiUserRelationListRequest();
             $reqMemberLists->setPageNumber($page);
             $reqMemberLists->setPageSize($pageSize);
@@ -91,13 +106,13 @@ class SiteMemberLists
             $curl   = Curl::init();
             $result = $curl->request('post', $getMembersUrl, $msgPacked);
             $results  = Helper::getDataFromPlugin($result);
-            $log->info('获取用户数据请求结果');
-            $log->info($results);
 
             $output  = [];
             $loading = true;
             if ($results['error'] !== 'success') {
-                return ["data" => $output, "loading" => $loading,'current_site_user_id' => ''];
+                $output = ["data" => $output, "loading" => $loading,'current_site_user_id' => ''];
+                $log->info(['return_results' => $output]);
+                return $output;
             }
             $data = $results['data'];
             $response  = new HaiUserRelationListResponse();
@@ -117,8 +132,7 @@ class SiteMemberLists
                 $loading = false;
             }
             $output = ["data" => $output, "loading" => $loading, 'current_site_user_id' => $siteUserId];
-            $log->info('获取用户数据');
-            $log->info($output);
+            $log->info(['return_results' => $output]);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
