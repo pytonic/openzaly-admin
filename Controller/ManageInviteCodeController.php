@@ -29,8 +29,8 @@ class ManageInviteCodeController extends BaseController
 
     public function __construct()
     {
-        $this->log     = Log::init();
-        $this->config  = Config::init();
+        $this->log      = Log::init();
+        $this->config   = Config::init();
         $this->pageSize = $this->config['base']['page_size'];
         $this->isAdmin();
     }
@@ -80,7 +80,7 @@ class ManageInviteCodeController extends BaseController
      */
     public function pullInviteCodeAction()
     {
-        $params  = file_get_contents("php://input");
+        $params = file_get_contents("php://input");
         $uidUrl = $this->config['base']['uic_list_url'];
         $lists  = ManageInviteCode::getVerifyCodeLists($params, $uidUrl, $this->pageSize);
         echo json_encode($lists);
@@ -95,7 +95,7 @@ class ManageInviteCodeController extends BaseController
     {
         $params  = file_get_contents("php://input");
         $generateVerifyUrl = $this->config['base']['uic_generate_url'];
-        $lists = ManageInviteCode::generateVerifyCodes($params, $generateVerifyUrl);
+        $lists   = ManageInviteCode::generateVerifyCodes($params, $generateVerifyUrl);
         echo $lists;
     }
 }
