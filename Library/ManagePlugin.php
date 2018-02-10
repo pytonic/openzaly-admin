@@ -43,14 +43,18 @@ class ManagePlugin
      */
     public static function pluginList($params, $pluginListUrl, $pageSize = 12)
     {
-        $log    = Log::init();
+        $log     = Log::init();
         $loading = true;
+        $logText = [
+            'msg'    => 'get plugin list',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取插件列表');
-            $result = Helper::getDataFromProxy($params);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $siteUserId = isset($result['site_user_id']) ? $result['site_user_id']: '';
-            $log->info([$result, $pluginListUrl]);
-            $page = isset($result['data']['page']) ? $result['data']['page'] : 1;
+            $page       = isset($result['data']['page']) ? $result['data']['page'] : 1;
 
             $pluginReq = new HaiPluginListRequest();
             $pluginReq->setPageNumber($page);
@@ -63,12 +67,13 @@ class ManagePlugin
             $result  = $curl->request('post', $pluginListUrl, $pluginReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('获取插件列表失败');
+                throw new \Exception('get plugin list failed');
             }
-            $data = $results['data'];
-            $pluginRep = new HaiPluginListResponse();
+            $data        = $results['data'];
+            $pluginRep   = new HaiPluginListResponse();
             $pluginRep->mergeFromString($data);
             $pluginLists = $pluginRep->getPlugin();
+
             $lists = [];
             foreach ($pluginLists as $key => $plugin) {
                 $lists[$key]['id']          = $plugin->getId();
@@ -82,8 +87,7 @@ class ManagePlugin
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' => $loading];
-            $log->info("获取结果");
-            $log->info($output);
+            $log->info(['return_results'=> $output]);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -103,10 +107,14 @@ class ManagePlugin
     public static function deletePlugin($params, $delPluginUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'delete plugin',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info('删除插件');
-            $log->info($params);
             $pluginId     = isset($result['data']['plugin_id']) ? $result['data']['plugin_id'] : '';
             $siteUserId   = $result['site_user_id'];
             $delPluginReq = new HaiPluginDeleteRequest();
@@ -117,11 +125,10 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $delPluginUrl, $delPluginReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info("获取结果");
-            $log->info($results);
             if ($results['error'] == 'fail') {
-                throw new \Exception('删除插件失败');
+                throw new \Exception('delete plugin failed');
             }
+            $log->info(['return_results' => 'success']);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -141,10 +148,14 @@ class ManagePlugin
     public static function updatePlugin($params, $updatePluginUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'update plugin',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info('更新插件');
-            $log->info($params);
             $siteUserId = $result['site_user_id'];
             $pluginId   = isset($result['data']['plugin_id']) ? $result['data']['plugin_id'] : '';
             $urlPage    = isset($result['data']['url_page']) ? $result['data']['url_page'] : '';
@@ -169,11 +180,10 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $updatePluginUrl, $upPluginReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info("获取结果");
-            $log->info($results);
             if ($results['error'] == 'fail') {
-                throw new \Exception('更新插件失败');
+                throw new \Exception('update plugin info failed');
             }
+            $log->info(['return_results' => 'success']);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -192,10 +202,14 @@ class ManagePlugin
     public static function addPlugin($params, $pluginAddUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'add plugin',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('添加插件');
-            $result = Helper::getDataFromProxy($params);
-            $log->info([$result, $pluginAddUrl]);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $siteUserId = $result['site_user_id'];
             $name       = isset($result['data']['name']) ? $result['data']['name'] : '';
             $urlPage    = isset($result['data']['url_page']) ? $result['data']['url_page'] : '';
@@ -216,11 +230,10 @@ class ManagePlugin
             $curl    = Curl::init();
             $result  = $curl->request('post', $pluginAddUrl, $pluginAddReq);
             $results = Helper::getDataFromPlugin($result);
-            $log->info("获取结果");
-            $log->info($results);
             if ($results['error'] == 'fail') {
                 throw new \Exception('添加插件失败');
             }
+            $log->info(['return_results' => $results]);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -229,7 +242,7 @@ class ManagePlugin
         }
     }
     /**
-     * 基本设置-编辑插件信息
+     * 基本设置-获取插件信息
      *
      * @author 尹少爷 2018.1.11
      *
@@ -239,11 +252,15 @@ class ManagePlugin
     public static function pluginInfo($params, $pluginInfoUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => 'get plugin info',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('插件信息');
-            $result = Helper::getDataFromProxy($params);
-            $log->info([$result, $pluginInfoUrl]);
-            $pluginId      = isset($result['data']['plugin_id']) ? $result['data']['plugin_id'] : 5;
+            $log->info($logText);
+            $result        = Helper::getDataFromProxy($params);
+            $pluginId      = isset($result['data']['plugin_id']) ? $result['data']['plugin_id'] : '';
             $siteUserId    = $result['site_user_id'];
             $pluginInfoReq = new HaiPluginProfileRequest();
             $pluginInfoReq->setPluginId($pluginId);
@@ -254,12 +271,12 @@ class ManagePlugin
             $result  = $curl->request('post', $pluginInfoUrl, $pluginInfoReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('获取插件信息结果失败');
+                throw new \Exception('get plugin info failed');
             }
-            $data = $results['data'];
+            $data          = $results['data'];
             $pluginInfoRep = new HaiPluginProfileResponse();
             $pluginInfoRep->mergeFromString($data);
-            $pluginInfo = $pluginInfoRep->getPlugin();
+            $pluginInfo    = $pluginInfoRep->getPlugin();
 
             $lists = [];
             $lists['id']            = $pluginInfo->getId();
@@ -269,8 +286,7 @@ class ManagePlugin
             $lists['plugin_icon']   = $pluginInfo->getIcon();
             $lists['plugin_status'] = $pluginInfo->getStatus();
 
-            $log->info("获取结果");
-            $log->info($lists);
+            $log->info(['return_results' => $lists]);
             return $lists;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());

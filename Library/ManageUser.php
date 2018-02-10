@@ -47,14 +47,18 @@ class ManageUser
     public static function getSiteUsers($params, $getMembersUrl, $pageSize = 12)
     {
         $log    = Log::init();
+        $logText = [
+            'msg'    => 'get site members',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取站点成员列表');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info($result);
             $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
             $page       = isset($result['data']['page']) ? $result['data']['page'] : 1;
             $results    = self::getMembersList($siteUserId, $getMembersUrl, $page, $pageSize);
-            $log->info($results);
+            $log->info(['return_results' => $results]);
             return $results;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -74,10 +78,14 @@ class ManageUser
     public static function sealupSiteUser($params, $sealupSiteUserUrl)
     {
         $log    = Log::init();
+        $logText = [
+            'msg'    => 'update site members status',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('用户状态修改');
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info([$result, $sealupSiteUserUrl]);
             $sealupSiteUserId = isset($result['data']['site_user_id']) ? $result['data']['site_user_id'] : '';
             $siteUserId       = $result['site_user_id'];
 
@@ -87,7 +95,7 @@ class ManageUser
             } else {
                 $status = UserStatus::SEALUP;
             }
-            $log->info("用户状态修改为".$status);
+            $log->info("update user status is ".$status);
             $sealupUserReq->setStatus($status);
             $sealupUserReq->setSiteUserId($sealupSiteUserId);
             $sealupUserReq = $sealupUserReq->serializeToString();
@@ -95,12 +103,11 @@ class ManageUser
 
             $curl   = Curl::init();
             $result = $curl->request('post', $sealupSiteUserUrl, $sealupUserReq);
-            $log->info('获取用户状态修改结果');
-            $log->info($result);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('用户状态修改失败');
+                throw new \Exception('update user info failed');
             }
+            $log->info(['return_results' => $results]);
             return  'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -119,14 +126,16 @@ class ManageUser
     public static function getSiteUserInfo($params, $userInfoUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => "get member info",
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info($params);
-            $result = Helper::getDataFromProxy($params);
-            $log->info('获取用户信息');
-            $log->info([$result, $userInfoUrl]);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $userId     = isset( $result['data']['site_user_id']) ?  $result['data']['site_user_id'] : '';
             $siteUserId = $result['site_user_id'];
-
             $userProReq = new HaiUserProfileRequest();
             $userProReq->setSiteUserId($userId);
             $userProReq = $userProReq->serializeToString();
@@ -134,25 +143,22 @@ class ManageUser
 
             $curl   = Curl::init();
             $result = $curl->request('post', $userInfoUrl, $userProReq);
-            $log->info('获取用户信息');
-            $log->info($result);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('获取用户信息失败');
+                throw new \Exception('get member info failed');
             }
             $data = $results['data'];
 
             $userProRep = new HaiUserProfileResponse();
             $userProRep->mergeFromString($data);
             $userInfo  = $userProRep->getUserProfile();
-            $log->info('获取用户信息-用户状态');
-            $log->info($userInfo->getUserStatus());
             $userInfos = [];
             $userInfos['user_id']     = $userInfo->getSiteUserId();
             $userInfos['user_name']   = $userInfo->getUserName();
             $userInfos['user_photo']  = $userInfo->getUserPhoto();
             $userInfos['user_desc']   = $userInfo->getSelfIntroduce();
             $userInfos['user_status'] = $userInfo->getUserStatus();
+            $log->info(['return_results' => $userInfos]);
             return $userInfos;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -171,16 +177,20 @@ class ManageUser
     public static function updateSiteUserInfo($params, $updateSiteUserUrl)
     {
         $log = Log::init();
+        $logText = [
+            'msg'    => "update member info",
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
+            $log->info($logText);
             $result = Helper::getDataFromProxy($params);
-            $log->info('更新用户信息源');
-            $log->info([$result, $updateSiteUserUrl]);
             $userName        = isset($result['data']['user_name']) ? $result['data']['user_name'] : '';
             $siteUserId      = isset($result['site_user_id']) ? $result['site_user_id'] : '';
             $editSiteUserId  = isset($result['data']['site_user_id']) ? $result['data']['site_user_id'] : '';
             $userPhoto       = isset($result['data']['user_photo']) ? $result['data']['user_photo'] : '';
 
-            $userProfile = new UserProfile();
+            $userProfile  = new UserProfile();
             $userProfile->setSiteUserId($editSiteUserId);
             $userProfile->setUserName($userName);
             $userProfile->setUserPhoto($userPhoto);
@@ -189,17 +199,13 @@ class ManageUser
             $updateUserReq = $updateUserReq->serializeToString();
             $updateUserReq = Helper::generateDataForProxy($siteUserId, $updateUserReq);
 
-            $curl   = Curl::init();
-            $result = $curl->request('post', $updateSiteUserUrl, $updateUserReq);
-            $log->info('获取更新结果');
-            $log->info($result);
-            if ($result == 'error') {
-                throw new \Exception('更新失败');
-            }
+            $curl    = Curl::init();
+            $result  = $curl->request('post', $updateSiteUserUrl, $updateUserReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('更新失败');
+                throw new \Exception('update member info failed');
             }
+            $log->info(['return_results' => 'success']);
             return "success";
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -213,19 +219,23 @@ class ManageUser
      *
      * @author 尹少爷 2017.12.27
      *
-     * @param string siteUserId 站点用户请求id
-     * @param string getMembersUrl 站点地址
-     * @param string page 站点地址
-     * @param string pageSize 站点地址
+     * @param string siteUserId
+     * @param string getMembersUrl
+     * @param string page
+     * @param string pageSize
      *
      * @return array
      */
     public static function getMembersList($siteUserId, $getMembersUrl = '', $page = 1, $pageSize = 20)
     {
         $log = Log::init();
-
+        $logText = [
+            'msg'          => "pull member info",
+            'method'       => __METHOD__,
+            'site_user_id' => $siteUserId,
+        ];
         try {
-            $log->info(['siteUserId'=>$siteUserId]);
+            $log->info($logText);
             $reqMemberLists = new HaiUserListRequest();
             $reqMemberLists->setPageNumber($page);
             $reqMemberLists->setPageSize($pageSize);
@@ -239,7 +249,8 @@ class ManageUser
             $output   = [];
             $loading  = true;
             if ($results['error'] !== 'success') {
-                return ["data" => $output, "loading" => $loading];
+                $output = ["data" => $output, "loading" => $loading];
+                return $output;
             }
             $data      = $results['data'];
             $response  = new HaiUserListResponse();
@@ -257,8 +268,6 @@ class ManageUser
                 $loading = false;
             }
             $output = ["data" => $output, "loading" => $loading];
-            $log->info('获取结果');
-            $log->info($output);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());

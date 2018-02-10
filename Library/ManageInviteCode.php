@@ -39,16 +39,19 @@ class ManageInviteCode
      */
     public static function getVerifyCodeLists($params, $getUicUrl, $pageSize = 12)
     {
-        $log    = Log::init();
+        $log     = Log::init();
         $loading = true;
+        $logText = [
+            'msg'    => 'get invite code list',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('获取邀请码参数');
-            $result = Helper::getDataFromProxy($params);
-            $log->info($result);
+            $log->info($logText);
+            $result     = Helper::getDataFromProxy($params);
             $page       = isset($result['data']['page']) ? $result['data']['page'] : 1;
             $siteUserId = isset($result['site_user_id']) ? $result['site_user_id'] : '';
             $statusKey  = isset($result['data']['code_status']) ? $result['data']['code_status'] : 'used';
-            $log->info([['page' => $page, 'page_size' => $pageSize, 'status' => $statusKey]]);
 
             $uicReq = new HaiUicListRequest();
             $uicReq->setPageNumber($page);
@@ -62,13 +65,13 @@ class ManageInviteCode
             $result  = $curl->request('post', $getUicUrl, $uicReq);
             $results = Helper::getDataFromPlugin($result);
             if ($results['error'] == 'fail') {
-                throw new \Exception('获取邀请码列表失败');
+                throw new \Exception('get invite code failed');
             }
-            $data   = $results['data'];
-            $uicRep = new HaiUicListResponse();
+            $data     = $results['data'];
+            $uicRep   = new HaiUicListResponse();
             $uicRep->mergeFromString($data);
             $uidLists = $uicRep->getUicInfo();
-            $lists = [];
+            $lists    = [];
             foreach ($uidLists as $key => $uic) {
                 $lists[$key]['code'] = $uic->getUic();
                 $lists[$key]['use_site_user_name'] = $uic->getUserName();
@@ -78,8 +81,7 @@ class ManageInviteCode
                 $loading = false;
             }
             $output = ['results' => $lists, 'loading' =>$loading];
-            $log->info("获取结果");
-            $log->info($output);
+            $log->info(['return_results'=> $output]);
             return $output;
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -97,25 +99,28 @@ class ManageInviteCode
      */
     public static function generateVerifyCodes($params, $generateVerifyUrl, $uicNumber = 20)
     {
-        $log    = Log::init();
+        $log     = Log::init();
+        $logText = [
+            'msg'    => 'get invite code list',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('生成邀请码列表');
-            $results = Helper::getDataFromProxy($params);
-            $log->info($results);
-            $siteUserId   = $results['site_user_id'];
-            $uicCreateReq = new HaiUicCreateRequest();
+            $log->info($logText);
+            $results       = Helper::getDataFromProxy($params);
+            $siteUserId    = $results['site_user_id'];
+            $uicCreateReq  = new HaiUicCreateRequest();
             $uicCreateReq->setUicNumber($uicNumber);
-            $uicCreateReq = $uicCreateReq->serializeToString();
-            $uicCreateReq = Helper::generateDataForProxy($siteUserId, $uicCreateReq);
+            $uicCreateReq  = $uicCreateReq->serializeToString();
+            $uicCreateReqs = Helper::generateDataForProxy($siteUserId, $uicCreateReq);
 
             $curl    = Curl::init();
-            $result  = $curl->request('post', $generateVerifyUrl, $uicCreateReq);
+            $result  = $curl->request('post', $generateVerifyUrl, $uicCreateReqs);
             $results = Helper::getDataFromPlugin($result);
-            $log->info("获取结果");
-            $log->info($results);
             if ($results['error'] == 'fail') {
-                throw new \Exception('生成邀请码失败');
+                throw new \Exception('generate invite code failed');
             }
+            $log->info(['return_results' => 'success']);
             return 'success';
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());

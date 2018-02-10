@@ -36,15 +36,17 @@ class ApplyAddFriend
     public static function handleApplyAddFriendRequest($params, $applyFriendUrl)
     {
         $log = Log::init();
-
+        $logText = [
+            'msg'    => 'apply add friend',
+            'method' => __METHOD__,
+            'params' => $params,
+        ];
         try {
-            $log->info('申请添加好友');
+            $log->info($logText);
             $result     = Helper::getDataFromProxy($params);
-            $log->info($result);
             $siteUserId = $result['site_user_id'];
             $friendId   = isset($result['data']['site_user_id']) ? $result['data']['site_user_id']: "";
             $reason     = isset($result['data']['apply_reason']) ? $result['data']['apply_reason'] : '';
-            $log->info([$siteUserId, $friendId, $reason]);
             return self::sendApplyFriendRequest($siteUserId, $friendId, $reason, $applyFriendUrl);
         } catch (\Exception $e) {
             $message = sprintf("msg:%s file:%s:%d", $e->getMessage(), $e->getFile(), $e->getLine());
@@ -67,8 +69,14 @@ class ApplyAddFriend
     public static function sendApplyFriendRequest($siteUserId, $friendId, $reason, $applyFriendUrl = '')
     {
         $log = Log::init();
+        $logText = [
+            'msg'          => 'send apply friend request',
+            'method'       => __METHOD__,
+            'site_user_id' => $siteUserId,
+            'friend_id'    => $friendId,
+        ];
         try {
-            $log->info('发送申请添加好友');
+            $log->info($logText);
             $friendApplyRequest  = new HaiFriendApplyRequest();
             $friendApplyRequest->setSiteFriendId($friendId);
             $friendApplyRequest->setApplyReason($reason);
@@ -77,11 +85,11 @@ class ApplyAddFriend
 
             $curl    = Curl::init();
             $result  = $curl->request('post', $applyFriendUrl, $msgPacked);
-            $params  = Helper::getDataFromPlugin($result);
-            $log->info($params);
-            if ($params['error'] == 'error') {
-                throw new \Exception('添加失败');
+            $results = Helper::getDataFromPlugin($result);
+            if ($results['error'] == 'error') {
+                throw new \Exception('apply add friend  failed');
             }
+            $log->info(['return_results' => $results]);
             return "success";
         } catch (\Exception $ex) {
             $message = sprintf("msg:%s file:%s:%d", $ex->getMessage(), $ex->getFile(), $ex->getLine());
