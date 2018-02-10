@@ -68,7 +68,7 @@ class Helper
         try {
             $log->info([$siteUserId, $content]);
             $proxyPackage    = new \Library\Plugin\ProxyPackage();
-            $proxyPackage->setData($content);
+            $proxyPackage->setData(base64_encode($content));
             $proxyPackage->setProxyContent(['1' => $siteUserId]);
             $proxyPackage = $proxyPackage->serializeToString();
             return $proxyPackage;
